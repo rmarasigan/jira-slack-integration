@@ -1,49 +1,19 @@
 # JIRA + Slack Integration
 
-A mini-project that uses AWS services to automate the creation of JIRA tickets/issues and send notifications to a designated Slack channel. The **API Gateway** acts as the entry point, receiving HTTP requests that trigger Lambda Functions. The **Lambda Functions** process the requests, creating JIRA tickets/issues based on the provided information. To ensure reliable and scalable processing, **Simple Queue Service(SQS)** is employed as a buffer between the API Gateway and the Lambda Functions. The processed tickets/issues are then published to the designated Slack channel, notifying the team members.
+A mini-project that uses AWS services to automate the creation of JIRA tickets/issues and send notifications to a designated Slack channel. The **API Gateway** acts as the entry point, receiving HTTP requests that trigger Lambda Functions. The **Lambda Functions** process the requests, creating JIRA tickets/issues based on the provided information. To ensure reliable and scalable processing, **Simple Queue Service (SQS)** is employed as a buffer between the API Gateway and the Lambda Functions. The processed tickets/issues are then published to the designated Slack channel, notifying the team members.
 
 Please note that this mini-project serves as a demonstration of integrating AWS services such as API Gateway, Lambda Functions, and Simple Queue Service (SQS), for creating JIRA tickets/issues and sending notifications to a Slack channel. It is not intended for real-world production use and may lack certain features, optimizations, and security issues required for a production-ready application.
 
-### Create the JIRA API Token
-An **API Token** is required to authenticate a script or other process with an Atlassasian Cloud Product.
-1. Log in to the Atlassian platform to access Jira Cloud or click [here](https://id.atlassian.com/manage/api-tokens) to directly open the page to create the API token.
-2. Go to **Settings** → **Atlassian account settings** → **Security** → **API token**.
-3. Click on "**Create API token**".
-  
-    a. Enter a distinctive and concise **Label** for your token in the window that display, then click **Create**.
+## JIRA Issue
+![jira-sample-issue](assets/img/jira-sample-issue.png)
 
-4. Copy the token to your clipboard.
+## Slack Channel Notification
+![slack-sample-notification](assets/img/slack-sample-notif.png)
 
-    > **NOTE**:
-    >
-    >  * For security reasons it isn't possible to view token after closing the creation dialog; if necessary, create a new token.
-    >  * You should store the token securely, just as for any password.
-
-### Create a JIRA Basic Auth Header
-1. Create a string that has a format of *user_email:api_token*.
-2. Encode the string using Base64 encoding.
-
-    **For Linux/MacOS**
-    ```bash
-    echo -n user@example.com:api_token | base64
-    ```
-
-    **For Windows 7 and later, using Microsoft Powershell**
-    ```shell
-    $Text = ‘user@example.com:api_token_string’
-    $Bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
-    $EncodedText = [Convert]::ToBase64String($Bytes)
-    $EncodedText
-    ```
-
-3. Supply an `Authorization` header with content `Basic` followed by the encoded string.
-    ```bash
-    curl -D- \
-      -X GET \
-      -H "Authorization: Basic ZnJlZDpmcmVk" \
-      -H "Content-Type: application/json" \
-      "https://your-domain.atlassian.net/rest/api/2/issue/issue-id"
-    ```
+## Pre-requisites
+* [JIRA Setup and Authentication](docs/app_integration/jira_setup.md)
+* [Slack Setup and Authentication](docs/app_integration/slack_setup.md)
+* [JIRA and Slack Secrets Manager Configuration](docs/app_integration/jira_slack_secrets_manager.md)
 
 ## Using `Makefile` to install, bootstrap, and deploy the project
 
