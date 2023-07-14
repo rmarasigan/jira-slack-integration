@@ -29,7 +29,6 @@ type KeyField struct {
 // IssueResponse represents a successful request response
 // in creating a JIRA issue.
 type IssueResponse struct {
-	ID   string `json:"id"`   // The ID of the created issue or subtask.
-	Key  string `json:"key"`  // The key of the created issue or subtask.
-	Self string `json:"self"` // The URL of the created issue or subtask.
+	ID  string `json:"id"`  // The ID of the created issue or subtask.
+	Key string `json:"key"` // The key of the created issue or subtask.
 }
