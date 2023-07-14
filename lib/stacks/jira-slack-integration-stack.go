@@ -21,6 +21,21 @@ func JiraSlackIntegrationStack(scope constructs.Construct, props *JiraSlackInteg
 	)
 
 	// *************** Lambda Functions *************** //
+	getJiraUsers := integration.NewLambdaFunction(stack, "get-jira-users", "cmd/get-jira-users")
+	getJiraUsers.AddEnvironment(jsii.String("JIRA_SECRET"), jirasecret.SecretArn(), nil)
+	getJiraUsers.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+	jirasecret.GrantRead(getJiraUsers, nil)
+
+	getJiraProject := integration.NewLambdaFunction(stack, "get-jira-project", "cmd/get-jira-project")
+	getJiraProject.AddEnvironment(jsii.String("JIRA_SECRET"), jirasecret.SecretArn(), nil)
+	getJiraProject.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+	jirasecret.GrantRead(getJiraProject, nil)
+
+	getJiraPriorities := integration.NewLambdaFunction(stack, "get-jira-priorities", "cmd/get-jira-priorities")
+	getJiraPriorities.AddEnvironment(jsii.String("JIRA_SECRET"), jirasecret.SecretArn(), nil)
+	getJiraPriorities.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+	jirasecret.GrantRead(getJiraPriorities, nil)
+
 	receiveTicket := integration.NewLambdaFunction(stack, "receive-ticket", "cmd/receive-ticket")
 	receiveTicket.AddEnvironment(jsii.String("JIRA_SECRET"), jirasecret.SecretArn(), nil)
 	receiveTicket.AddEnvironment(jsii.String("JIRA_QUEUE"), queue.QueueUrl(), nil)
@@ -51,8 +66,46 @@ func JiraSlackIntegrationStack(scope constructs.Construct, props *JiraSlackInteg
 	JiraApiModel := integration.ApiJIRAModel(api)
 	JiraApiModel.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
 
+	RequestBodyValidator := integration.ApiRequestBodyValidator(api)
+	RequestBodyValidator.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+
+	RequestParameterValidator := integration.ApiRequestParameterValidator(api)
+	RequestParameterValidator.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+
 	jira := integration.NewApiResource(api, "jira")
 	jira.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+
+	users := integration.ApiSubResource(jira, "users")
+	users.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+	users.AddMethod(
+		integration.HTTP_METHOD_GET,
+		awsapigateway.NewLambdaIntegration(getJiraUsers, nil),
+		&awsapigateway.MethodOptions{
+			ApiKeyRequired: integration.ENABLED,
+		})
+
+	project := integration.ApiSubResource(jira, "project")
+	project.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+	project.AddMethod(
+		integration.HTTP_METHOD_GET,
+		awsapigateway.NewLambdaIntegration(getJiraProject, nil),
+		&awsapigateway.MethodOptions{
+			ApiKeyRequired: integration.ENABLED,
+			RequestParameters: &map[string]*bool{
+				"method.request.querystring.project_key": jsii.Bool(true),
+			},
+			RequestValidator: RequestParameterValidator,
+		},
+	)
+
+	priorities := integration.ApiSubResource(jira, "priorities")
+	priorities.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+	priorities.AddMethod(
+		integration.HTTP_METHOD_GET,
+		awsapigateway.NewLambdaIntegration(getJiraPriorities, nil),
+		&awsapigateway.MethodOptions{
+			ApiKeyRequired: integration.ENABLED,
+		})
 
 	ticket := integration.ApiSubResource(jira, "ticket")
 	ticket.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
@@ -65,6 +118,6 @@ func JiraSlackIntegrationStack(scope constructs.Construct, props *JiraSlackInteg
 			RequestModels: &map[string]awsapigateway.IModel{
 				"application/json": JiraApiModel,
 			},
-			RequestValidatorOptions: integration.ApiRequestBodyValidate("JiraIntegration_RequestBodyValidator"),
+			RequestValidator: RequestBodyValidator,
 		})
 }

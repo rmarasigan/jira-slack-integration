@@ -13,12 +13,78 @@ import (
 )
 
 type Configuration struct {
-	Token        string `json:"token"`         // JIRA API Token for authentication.
-	Username     string `json:"username"`      // Username to be used for Basic Auth.
-	Endpoint     string `json:"endpoint"`      // The Atlassian Domain of your JIRA.
-	IssuePath    string `json:"issue_path"`    // The REST API resource path for the JIRA issue.
-	ProjectPath  string `json:"project_path"`  // The REST API resource path for the JIRA project.
-	PriorityPath string `json:"priority_path"` // The REST API resource path for the JIRA priority.
+	Token           string `json:"token"`             // JIRA API Token for authentication.
+	Username        string `json:"username"`          // Username to be used for Basic Auth.
+	Endpoint        string `json:"endpoint"`          // The Atlassian Domain of your JIRA.
+	IssuePath       string `json:"issue_path"`        // The REST API resource path for the JIRA issue.
+	ProjectPath     string `json:"project_path"`      // The REST API resource path for the JIRA project.
+	PriorityPath    string `json:"priority_path"`     // The REST API resource path for the JIRA priority.
+	UsersSearchPath string `json:"users_search_path"` // The REST API resource path for the JIRA users.
+}
+
+// GetUsers returns the representation of the JIRA users.
+//
+// JIRA API docs: https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-users/#api-rest-api-2-users-search-get
+func (cfg Configuration) GetUsers(ctx context.Context) (users []User, err error) {
+	var (
+		client   http.Client
+		endpoint = fmt.Sprintf("%s%s", cfg.Endpoint, cfg.UsersSearchPath)
+	)
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		trail.Error("failed to create a new request with context")
+		return
+	}
+
+	// Supply the request headers
+	request.SetBasicAuth(cfg.Username, cfg.Token)
+	request.Header.Set("Content-Type", "application/json")
+
+	// Send an HTTP request and return a response
+	trail.Info("Start fetching all JIRA Users...")
+	response, err := client.Do(request)
+	if err != nil {
+		trail.Error("failed to send an HTTP request")
+		return
+	}
+	defer response.Body.Close()
+
+	switch response.StatusCode {
+	case http.StatusOK:
+		// Read response from the request
+		result, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			trail.Error("failed to read the response body")
+			return users, err
+		}
+
+		err = api.ParseJSON(result, &users)
+		if err != nil {
+			utility.Error(err, "JSONError", "failed to unmarshal JSON-encoded data",
+				utility.KVP{Key: "response", Value: string(result)})
+
+			return users, err
+		}
+		utility.Info("JIRAUsers", "successfully fetched JIRA users", utility.KVP{Key: "users", Value: users})
+
+		return users, nil
+
+	default:
+		// Read response from the request
+		result, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			trail.Error("failed to read the response body")
+			return users, err
+		}
+
+		err = errors.New("users are not found")
+		utility.Error(err, "JIRAError", "unable to fetch JIRA users",
+			utility.KVP{Key: "response", Value: string(result)},
+			utility.KVP{Key: "status", Value: response.Status})
+
+		return users, err
+	}
 }
 
 // GetProject returns the representation of the project by passing the JIRA Project 'key' or 'id'.
@@ -135,7 +201,7 @@ func (cfg Configuration) GetPriority(ctx context.Context, id string) (Priority, 
 
 			return priority, err
 		}
-		utility.Info("JIRAProject", "successfully fetched issue priority",
+		utility.Info("JIRAPriority", "successfully fetched issue priority",
 			utility.KVP{Key: "priority", Value: priority})
 
 		return priority, nil
@@ -155,6 +221,73 @@ func (cfg Configuration) GetPriority(ctx context.Context, id string) (Priority, 
 			utility.KVP{Key: "status", Value: response.Status})
 
 		return priority, err
+	}
+}
+
+// GetPriorities returns all of the JIRA issue priority.
+//
+// JIRA API docs: https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-issue-priorities/#api-rest-api-2-priority-id-get
+func (cfg Configuration) GetPriorities(ctx context.Context) ([]Priority, error) {
+	var (
+		client     http.Client
+		priorities []Priority
+		endpoint   = fmt.Sprintf("%s%s", cfg.Endpoint, cfg.PriorityPath)
+	)
+
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		trail.Error("failed to create a new request with context")
+		return priorities, err
+	}
+
+	// Supply the request headers
+	request.SetBasicAuth(cfg.Username, cfg.Token)
+	request.Header.Set("Content-Type", "application/json")
+
+	// Send an HTTP request and return a response
+	trail.Info("Start fetching a JIRA Priorities...")
+	response, err := client.Do(request)
+	if err != nil {
+		trail.Error("failed to send an HTTP request")
+		return priorities, err
+	}
+	defer response.Body.Close()
+
+	switch response.StatusCode {
+	case http.StatusOK:
+		// Read response from the request
+		result, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			trail.Error("failed to read the response body")
+			return priorities, err
+		}
+
+		err = api.ParseJSON(result, &priorities)
+		if err != nil {
+			utility.Error(err, "JSONError", "failed to unmarshal JSON-encoded data",
+				utility.KVP{Key: "response", Value: string(result)})
+
+			return priorities, err
+		}
+		utility.Info("JIRAPriority", "successfully fetched issue priority",
+			utility.KVP{Key: "priority", Value: priorities})
+
+		return priorities, nil
+
+	default:
+		// Read response from the request
+		result, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			trail.Error("failed to read the response body")
+			return priorities, err
+		}
+
+		err = errors.New("issue priorities are not found")
+		utility.Error(err, "JIRAError", "unable to fetch issue priorities",
+			utility.KVP{Key: "response", Value: string(result)},
+			utility.KVP{Key: "status", Value: response.Status})
+
+		return priorities, err
 	}
 }
 

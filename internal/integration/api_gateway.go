@@ -75,12 +75,26 @@ func SetupGatewayBadRequestBody(api awsapigateway.RestApi, id string) {
 	})
 }
 
-// ApiRequestBodyValidate returns a configured request validator to validate
+// ApiRequestBodyValidator returns a configured request validator to validate
 // the API request body.
-func ApiRequestBodyValidate(id string) *awsapigateway.RequestValidatorOptions {
-	return &awsapigateway.RequestValidatorOptions{
-		ValidateRequestBody:       ENABLED,
-		ValidateRequestParameters: DISABLED,
-		RequestValidatorName:      jsii.String(id),
-	}
+func ApiRequestBodyValidator(api awsapigateway.RestApi) awsapigateway.RequestValidator {
+	return api.AddRequestValidator(
+		jsii.String("JiraIntegration_RequestBodyValidator"),
+		&awsapigateway.RequestValidatorOptions{
+			ValidateRequestBody:       ENABLED,
+			ValidateRequestParameters: DISABLED,
+			RequestValidatorName:      jsii.String("JiraIntegration_RequestBodyValidator"),
+		})
+}
+
+// ApiRequestParameterValidator returns a configured request validator to validate
+// the API request parameters.
+func ApiRequestParameterValidator(api awsapigateway.RestApi) awsapigateway.RequestValidator {
+	return api.AddRequestValidator(
+		jsii.String("JiraIntegration_RequestParameterValidator"),
+		&awsapigateway.RequestValidatorOptions{
+			ValidateRequestBody:       DISABLED,
+			ValidateRequestParameters: ENABLED,
+			RequestValidatorName:      jsii.String("JiraIntegration_RequestParameterValidator"),
+		})
 }
