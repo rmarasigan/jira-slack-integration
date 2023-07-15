@@ -17,7 +17,7 @@ func main() {
 }
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	var projectKey = request.QueryStringParameters["project_key"]
+	var projectKey = request.QueryStringParameters["key"]
 
 	// 1. Get the JIRA Configuration.
 	jiracfg, err := jira.GetConfiguration(ctx)
@@ -34,7 +34,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*event
 		// 2.1 Check if the error is "not found" and return an HTTP
 		// BadRequest Status response.
 		if strings.HasSuffix(err.Error(), "not found") {
-			response, err := api.EncodeJSONString(api.SetErrorMessage(errors.New("'project_key' not found")))
+			response, err := api.EncodeJSONString(api.SetErrorMessage(errors.New("'key' not found")))
 			if err != nil {
 				utility.Error(err, "JSONError", "failed to unmarshal the JSON-encoded data")
 				return api.StatusInternalServer(), nil

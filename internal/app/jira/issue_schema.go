@@ -9,7 +9,7 @@ type Issue struct {
 type Fields struct {
 	Summary     string   `json:"summary"`             // The issue Title
 	Description string   `json:"description"`         // The issue Description
-	Project     KeyField `json:"project"`             // The issue Project ID
+	Project     KeyField `json:"project"`             // The issue Project Key
 	Parent      KeyField `json:"parent,omitempty"`    // Contain the ID or key of the parent issue
 	Priority    IDField  `json:"priority,omitempty"`  // The issue priority ID
 	IssueType   IDField  `json:"issuetype,omitempty"` // Must be set to a subtask issue type

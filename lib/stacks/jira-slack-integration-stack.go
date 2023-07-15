@@ -92,7 +92,7 @@ func JiraSlackIntegrationStack(scope constructs.Construct, props *JiraSlackInteg
 		&awsapigateway.MethodOptions{
 			ApiKeyRequired: integration.ENABLED,
 			RequestParameters: &map[string]*bool{
-				"method.request.querystring.project_key": jsii.Bool(true),
+				"method.request.querystring.key": jsii.Bool(true),
 			},
 			RequestValidator: RequestParameterValidator,
 		},
