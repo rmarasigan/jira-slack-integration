@@ -313,7 +313,7 @@ Creates an issue or, where the option to create subtask is enabled in Jira, a su
 
 **Endpoint**: `https://{api_id}.execute-api.{region}.amazonaws.com/production/jira/ticket`
 
-## Payload
+### Payload
 <table>
   <tr>
     <th>Parameter</th>
@@ -390,7 +390,7 @@ Creates an issue or, where the option to create subtask is enabled in Jira, a su
       <code>labels</code>
     </td>
     <td>[]string</td>
-    <td>The issue assignee (user account ID).</td>
+    <td>The issue label(s).</td>
     <td>❌</td>
   </tr>
 </table>
