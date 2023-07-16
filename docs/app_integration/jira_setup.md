@@ -52,7 +52,7 @@ An **API Token** is required to authenticate a script or other process with an A
     >  * For security reasons it isn't possible to view token after closing the creation dialog; if necessary, create a new token.
     >  * You should store the token securely, just as for any password.
 
-### Use an API Token
+### Use the API Token
 1. Create a string that has a format of *user_email:api_token*.
 2. Encode the string using Base64 encoding.
 

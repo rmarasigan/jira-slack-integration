@@ -50,7 +50,30 @@ Next, open the `env.go` file located in the `internal/app/config` directory. Loo
     </td>
     <td>The REST API resource path for the JIRA priority.</td>
   </tr>
+  <tr>
+    <td>
+      <code>users_search_path</code>
+    </td>
+    <td>The REST API resource path for the JIRA users.</td>
+  </tr>
 </table>
+
+#### Sample JIRA Configuration
+```json
+{
+  "token": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "username": "username@email.com",
+  "endpoint": "https://domain_name.atlassian.net",
+  "issue_path": "/rest/api/2/issue/",
+  "project_path": "/rest/api/2/project/",
+  "priority_path": "/rest/api/2/priority/",
+  "users_search_path":"/rest/api/2/users/search/"
+}
+```
+
+#### API Reference
+* [Rest API V2](https://developer.atlassian.com/cloud/jira/platform/rest/v2/intro/)
+* [Rest API V3](https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/)
 
 ### Slack Configuration
 <table>
@@ -83,3 +106,19 @@ Next, open the `env.go` file located in the `internal/app/config` directory. Loo
     <td>The Slack API endpoint of chat.postMessage.</td>
   </tr>
 </table>
+
+#### Sample Slack Configuration
+```json
+{
+  "token": "xoxb-xxxxxxxxxxxx-xxxxxxxxxxxx-xxxxxxxxxxxxxxx",
+  "channel": "xxxxxxxx",
+  "enabled": "true",
+  "chat_endpoint": "https://slack.com/api/chat.postMessage"
+}
+```
+
+#### API Reference
+* [Web API methods](https://api.slack.com/methods)
+* [API object types](https://api.slack.com/types?ref=apis)
+* [chat.postMessage](https://api.slack.com/methods/chat.postMessage)
+* [Using the Slack Web API](https://api.slack.com/web#ssl)

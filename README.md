@@ -4,6 +4,9 @@ A mini-project that uses AWS services to automate the creation of JIRA tickets/i
 
 Please note that this mini-project serves as a demonstration of integrating AWS services such as API Gateway, Lambda Functions, and Simple Queue Service (SQS), for creating JIRA tickets/issues and sending notifications to a Slack channel. It is not intended for real-world production use and may lack certain features, optimizations, and security issues required for a production-ready application.
 
+### Architecture
+![jira-slack-integration](assets/img/jira-slack-integration.png)
+
 ## JIRA Issue
 ![jira-sample-issue](assets/img/jira-sample-issue.png)
 
@@ -14,6 +17,13 @@ Please note that this mini-project serves as a demonstration of integrating AWS 
 * [JIRA Setup and Authentication](docs/app_integration/jira_setup.md)
 * [Slack Setup and Authentication](docs/app_integration/slack_setup.md)
 * [JIRA and Slack Secrets Manager Configuration](docs/app_integration/jira_slack_secrets_manager.md)
+
+## API Usage and Specification
+* [JIRA Integration API](docs/api_usage/jira_api.md)
+    * [Get all JIRA Users](docs/api_usage/jira_api.md#get-all-jira-users)
+    * [Get JIRA Project Details](docs/api_usage/jira_api.md#get-jira-project-details)
+    * [Get all Issue Priorities](docs/api_usage/jira_api.md#get-all-issue-priorities)
+    * [Create a JIRA Issue](docs/api_usage/jira_api.md#create-a-jira-issue)
 
 ## Using `Makefile` to install, bootstrap, and deploy the project
 
