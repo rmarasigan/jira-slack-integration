@@ -17,6 +17,8 @@ func main() {
 }
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	utility.InitContext(ctx)
+
 	var projectKey = request.QueryStringParameters["key"]
 
 	// 1. Get the JIRA Configuration.

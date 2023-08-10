@@ -17,6 +17,8 @@ func main() {
 }
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	utility.InitContext(ctx)
+
 	// 1. Get the JIRA Configuration.
 	jiracfg, err := jira.GetConfiguration(ctx)
 	if err != nil {
