@@ -3,11 +3,13 @@ package slack
 import (
 	"context"
 	"errors"
+	"fmt"
 	"jira-slack-integration/api"
 	awswrapper "jira-slack-integration/internal/aws_wrapper"
 	"jira-slack-integration/internal/trail"
 	"jira-slack-integration/internal/utility"
 	"os"
+	"strings"
 )
 
 // GetConfiguration fetches the Slack secret from the Secrets Manager and
@@ -41,5 +43,43 @@ func GetConfiguration(ctx context.Context) (Configuration, error) {
 		return cfg, err
 	}
 
+	err = cfg.isRequiredFieldsEmpty()
+	if err != nil {
+		return cfg, err
+	}
+
 	return cfg, nil
+}
+
+// isRequiredFieldsEmpty checks if the required fields are not
+// empty.
+func (cfg Configuration) isRequiredFieldsEmpty() error {
+	var (
+		fields  []string
+		isEmpty = func(field string) bool {
+			return field == ""
+		}
+	)
+
+	if isEmpty(cfg.Enabled) {
+		fields = append(fields, "enabled")
+	}
+
+	if isEmpty(cfg.Token) {
+		fields = append(fields, "token")
+	}
+
+	if isEmpty(cfg.Channel) {
+		fields = append(fields, "channel")
+	}
+
+	if isEmpty(cfg.ChatEndpoint) {
+		fields = append(fields, "chat_endpoint")
+	}
+
+	if len(fields) > 0 {
+		return fmt.Errorf("missing field(s): %s", strings.Join(fields, ", "))
+	}
+
+	return nil
 }
