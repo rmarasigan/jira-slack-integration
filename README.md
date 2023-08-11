@@ -4,19 +4,30 @@ A mini-project that uses AWS services to automate the creation of JIRA tickets/i
 
 Please note that this mini-project serves as a demonstration of integrating AWS services such as API Gateway, Lambda Functions, and Simple Queue Service (SQS), for creating JIRA tickets/issues and sending notifications to a Slack channel. It is not intended for real-world production use and may lack certain features, optimizations, and security issues required for a production-ready application.
 
-### Architecture
+## Architecture
+### JIRA + Slack Integration
 ![jira-slack-integration](assets/img/jira-slack-integration.png)
 
-## JIRA Issue
+#### JIRA Issue
 ![jira-sample-issue](assets/img/jira-sample-issue.png)
 
-## Slack Channel Notification
+#### Slack Channel Notification
 ![slack-sample-notification](assets/img/slack-sample-notif.png)
+
+### CloudWatch Lambda Subscription
+![cloudwatch-lambda-subscription](assets/img/cloudwatch-lambda-subscription.png)
+
+#### JIRA Issue
+![cw-lambda-subscription-jira-ticket](assets/img/cw-lambda-subscription-jira-ticket.png)
+
+#### Slack Channel Notification
+![cw-lambda-subscription-slack-notif](assets/img/cw-lambda-subscription-slack-notif.png)
 
 ## Pre-requisites
 * [JIRA Setup and Authentication](docs/app_integration/jira_setup.md)
 * [Slack Setup and Authentication](docs/app_integration/slack_setup.md)
 * [JIRA and Slack Secrets Manager Configuration](docs/app_integration/jira_slack_secrets_manager.md)
+* [CloudWatch Alert Secrets Manager Configuration](docs/app_integration/cloudwatch_alert_secrets_manager.md)
 
 ## API Usage and Specification
 * [JIRA Integration API](docs/api_usage/jira_api.md)
@@ -24,6 +35,39 @@ Please note that this mini-project serves as a demonstration of integrating AWS 
     * [Get JIRA Project Details](docs/api_usage/jira_api.md#get-jira-project-details)
     * [Get all Issue Priorities](docs/api_usage/jira_api.md#get-all-issue-priorities)
     * [Create a JIRA Issue](docs/api_usage/jira_api.md#create-a-jira-issue)
+
+## CloudWatch Lambda Subscription
+1. Grant CloudWatch Logs permission to execute the Lambda Function. Replace the placeholder `account_id` with your account, and `region` with your desired region.
+    ```bash
+    dev@dev:~$ aws lambda add-permission \
+    --function-name "log-subscription" \
+    --statement-id "log-subscription" \
+    --principal "logs.amazonaws.com" \
+    --action "lambda:InvokeFunction" \
+    --source-arn "arn:aws:logs:region:account_id:log-group:*:*" \
+    --source-account "account_id"
+    ```
+
+2. Create a Lambda Subscription Filter.
+    * **Using AWS Console**
+        * Go to **CloudWatch** → **Logs** → **Log groups** → *Log Group Name*
+        * Go to **Subscription filters** → **Create** → **Create Lambda subscription filter**
+        * Choose the Lambda function for the destination that you want to subscribe to the filter
+        * Configure log format and filters
+            * Sample configuration of log format and filters
+                * **Log format**: JSON
+                * **Subscription filter format**: `{$.log_level="ERROR"}`
+
+    * **Using AWS CLI**
+        * Create a subscription filter using the following command and replace the placeholder `account_id` with your account, `region` with your desired region, `log_group_name` with the log group to process, and `filter_pattern` with your desired pattern.
+        
+            ```bash
+            dev@dev:~$ aws logs put-subscription-filter \
+            --log-group-name "log_group_name" \
+            --filter-name "log-error-subscription" \
+            --filter-pattern "filter_pattern" \
+            --destination-arn "arn:aws:lambda:region:account_id:function:log-subscription"
+            ```
 
 ## Using `Makefile` to install, bootstrap, and deploy the project
 

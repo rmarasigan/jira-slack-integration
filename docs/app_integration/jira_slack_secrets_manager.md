@@ -40,9 +40,7 @@ Next, open the `env.go` file located in the `internal/app/config` directory. Loo
     <td>
       <code>project_path</code>
     </td>
-    <td>
-      The REST API resource path for the JIRA project.
-    </td>
+    <td>The REST API resource path for the JIRA project.</td>
   </tr>
   <tr>
     <td>
