@@ -14,10 +14,11 @@ import (
 
 func JiraSlackIntegrationStack(scope constructs.Construct, props *JiraSlackIntegrationStackProps) {
 	var (
-		stack       = newStack(scope, props)
-		queue       = integration.NewQueueWithDLQ(stack, "jira-integration-queue", true, jsii.Number(60000))
-		jirasecret  = awssecretsmanager.Secret_FromSecretCompleteArn(stack, jsii.String("JiraIntegrationSecret"), config.JIRA_SECRET)
-		slacksecret = awssecretsmanager.Secret_FromSecretCompleteArn(stack, jsii.String("SlackIntegrationSecret"), config.SLACK_SECRET)
+		stack            = newStack(scope, props)
+		queue            = integration.NewQueueWithDLQ(stack, "jira-integration-queue", true, jsii.Number(60000))
+		jirasecret       = awssecretsmanager.Secret_FromSecretCompleteArn(stack, jsii.String("JiraIntegrationSecret"), config.JIRA_SECRET)
+		slacksecret      = awssecretsmanager.Secret_FromSecretCompleteArn(stack, jsii.String("SlackIntegrationSecret"), config.SLACK_SECRET)
+		cloudwatchsecret = awssecretsmanager.Secret_FromSecretCompleteArn(stack, jsii.String("CloudWatchIntegrationSecret"), config.CLOUDWATCH_SECRET)
 	)
 
 	// *************** Lambda Functions *************** //
@@ -56,6 +57,11 @@ func JiraSlackIntegrationStack(scope constructs.Construct, props *JiraSlackInteg
 				BatchSize:               jsii.Number(1),
 				ReportBatchItemFailures: integration.ENABLED,
 			}))
+
+	logSubscription := integration.NewLambdaFunction(stack, "log-subscription", "cmd/log-subscription")
+	logSubscription.AddEnvironment(jsii.String("CLOUDWATCH_ALERT_SECRET"), cloudwatchsecret.SecretArn(), nil)
+	logSubscription.ApplyRemovalPolicy(awscdk.RemovalPolicy_DESTROY)
+	cloudwatchsecret.GrantRead(logSubscription, nil)
 
 	// *************** API Gateway *************** //
 	api := integration.NewRestApi(stack, "jira-integration", "production")
@@ -120,4 +126,9 @@ func JiraSlackIntegrationStack(scope constructs.Construct, props *JiraSlackInteg
 			},
 			RequestValidator: RequestBodyValidator,
 		})
+
+	// Add the API Root and Ticket Path to the "log-subscription"
+	// Lambda Function Environment.
+	logSubscription.AddEnvironment(jsii.String("API_ROOT_URL"), api.Url(), nil)
+	logSubscription.AddEnvironment(jsii.String("API_TICKET_PATH"), ticket.Path(), nil)
 }

@@ -1,6 +1,8 @@
 package config
 
-import "github.com/aws/jsii-runtime-go"
+import (
+	"github.com/aws/jsii-runtime-go"
+)
 
 var (
 	JIRA_SQS_GROUP_ID  = "jira.ticket"
@@ -9,4 +11,5 @@ var (
 	STACK_ID           = jsii.String("JiraSlackIntegrationStack")
 	JIRA_SECRET        = jsii.String("JIRA-SECRET-ARN")
 	SLACK_SECRET       = jsii.String("SLACK-SECRET-ARN")
+	CLOUDWATCH_SECRET  = jsii.String("CLOUDWATCH-SECRET-ARN")
 )

@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	LOG_OK    = "OK"
-	LOG_INFO  = "INFO"
-	LOG_DEBUG = "DEBUG"
-	LOG_ERROR = "ERROR"
+	LOG_OK      = "OK"
+	LOG_INFO    = "INFO"
+	LOG_DEBUG   = "DEBUG"
+	LOG_WARNING = "WARNING"
+	LOG_ERROR   = "ERROR"
 )
 
 type Logs struct {
@@ -102,6 +103,25 @@ func Debug(code, message string, kv ...KVP) {
 	entry.Code = code
 	entry.Level = LOG_DEBUG
 	entry.Message = message
+	entry.SetTimeStamp()
+	entry.SetLambdaContext()
+
+	if len(kv) != 0 {
+		for _, kvp := range kv {
+			entry.SetKeys(kvp.KeyValue())
+		}
+	}
+
+	entry.Print()
+}
+
+// Warning prints a warning log information.
+func Warning(code, message string, kv ...KVP) {
+	var entry Logs
+
+	entry.Code = code
+	entry.Message = message
+	entry.Level = LOG_WARNING
 	entry.SetTimeStamp()
 	entry.SetLambdaContext()
 
